@@ -1,21 +1,25 @@
-import {Sequelize} from 'sequelize'
-import dotenv from 'dotenv'
-dotenv.config()
-// import mysql2 from 'mysql2'
-const sequelize = new Sequelize("rebonorte", "root", "",{
-    host: "localhost",
-    dialect: "mysql",
-    port: 3306
-})
+import { Sequelize } from 'sequelize';
+import dotenv from 'dotenv';
+dotenv.config();    
 
-
-export const testConnection = async () => {
-    try {
-        await connection.authenticate()
-        console.log("coneccion establecido")
-    } catch (error) {
-        console.error("error en la coneccion", error)
-    }
-}
-
-export default sequelize
+const sequelize = new Sequelize(process.env.DATABASE_URL, {
+  dialect: 'postgres',
+  protocol: 'postgres',
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false, // necesario para conexión segura en Render
+    },
+  },
+  logging: false,
+});
+// Verifica la conexión
+sequelize.authenticate()
+  .then(() => {
+    console.log('Conexión a la base de datos establecida correctamente.');
+  })
+  .catch(err => {
+    console.error('No se pudo conectar a la base de datos:', err);
+  });
+// Exporta la instancia de Sequelize para usarla en otros archivos
+export default sequelize;
