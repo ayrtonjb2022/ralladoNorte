@@ -97,8 +97,34 @@ const getAllVentas = async (req, res) => {
 const deleteMovimiento = async (req, res) => {
     try {
         const { id } = req.params;
+
+        console.log(id);
+        if(!id) {
+            return res.status(400).json({ msg: "El id no es valido" });
+        }
+        const movimientoDb = await Movimiento.findOne({ where: { id } });
+        if (!movimientoDb) {
+            return res.status(400).json({ msg: "El movimiento no existe" });
+        }
+        const tipo = movimientoDb.tipo;
+        if(tipo == "ingreso") {
+            await CarteraVentas.destroy({ where: { refer_movimiento: id } });
+        }
+        const cajaDb = await Caja.findOne({ where: { id: movimientoDb.caja_id } });
+        if (!cajaDb) {
+            return res.status(400).json({ msg: "La caja no existe" });
+        }        
+        
         const movimiento = await Movimiento.destroy({ where: { id } });
-        res.json(movimiento);
+        if (!movimiento) {
+            return res.status(400).json({ msg: "No se pudo eliminar el movimiento" });
+        }
+        if (tipo == "ingreso") {
+            await Caja.update({ saldo_final: Number(cajaDb.saldo_final) - Number(movimientoDb.monto) }, { where: { id: cajaDb.id } });
+        } else {
+            await Caja.update({ saldo_final: Number(cajaDb.saldo_final) + Number(movimientoDb.monto) }, { where: { id: cajaDb.id } });
+        }
+        res.json({ msg: "Movimiento eliminado" }, { ok: 200 });
     } catch (error) {
         console.log(error);
     }
