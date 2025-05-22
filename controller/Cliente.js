@@ -4,7 +4,7 @@ import User from "../models/userModel.js";
 export const getClientes = async (req, res) => {
     const userid = req.user.id
     try {
-        const clientes = await Clientes.findAll({ where: { user_id: userid } });
+        const clientes = await Clientes.findAll({ where: { user_id: userid, status: 'active' } });
         res.json(clientes);
     } catch (error) {
         console.error("Error al obtener clientes:", error);
