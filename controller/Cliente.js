@@ -16,9 +16,7 @@ export const createCliente = async (req, res) => {
     const { nombre_cliente, apellido_cliente, direccion_cliente, contacto_cliente } = req.body;
     const userid = req.user.id
 
-    if (isNaN(Number(valor))) {
-        return res.status(400).json({ message: "El valor debe ser un número" });
-    }
+    
     try {
         const cliente = await Clientes.create({ nombre_cliente, apellido_cliente, direccion_cliente, contacto_cliente, user_id: userid });
         res.status(201).json({
